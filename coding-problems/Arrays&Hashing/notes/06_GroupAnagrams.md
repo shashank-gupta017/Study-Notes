@@ -11,7 +11,7 @@ An **Anagram** is a word or phrase formed by rearranging the letters of a differ
 
 ## Examples
 
-### Example 1:
+### Example 1: Mixed Anagrams
 ```
 Input: strs = ["eat","tea","tan","ate","nat","bat"]
 Output: [["bat"],["nat","tan"],["ate","eat","tea"]]
@@ -22,18 +22,49 @@ Explanation:
 - "bat" stands alone
 ```
 
-### Example 2:
+### Example 2: Empty String
 ```
 Input: strs = [""]
 Output: [[""]]
 Explanation: Empty string forms its own group.
 ```
 
-### Example 3:
+### Example 3: Single Element
 ```
 Input: strs = ["a"]
 Output: [["a"]]
 Explanation: Single string forms its own group.
+```
+
+### Example 4: All Same Anagrams
+```
+Input: strs = ["abc", "bca", "cab", "bac"]
+Output: [["abc", "bca", "cab", "bac"]]
+
+Explanation:
+All strings are anagrams of each other.
+Sorted form: "abc"
+They all belong to the same group.
+```
+
+### Example 5: No Anagrams
+```
+Input: strs = ["a", "b", "c", "d"]
+Output: [["a"], ["b"], ["c"], ["d"]]
+
+Explanation:
+No two strings are anagrams.
+Each forms its own group.
+```
+
+### Example 6: Multiple Groups
+```
+Input: strs = ["listen", "silent", "hello", "world", "enlist"]
+Output: [["listen", "silent", "enlist"], ["hello"], ["world"]]
+
+Explanation:
+- "listen", "silent", "enlist" are anagrams (e,i,l,n,s,t)
+- "hello" and "world" are unique
 ```
 
 ---
@@ -267,30 +298,60 @@ map = {}
 strs = ["eat", "tea", "tan", "ate", "nat", "bat"]
 
 Step 1: Process "eat"
-  Sort "eat" → "aet"
+  Input: "eat"
+  Convert to char[]: ['e', 'a', 't']
+  Sort: ['a', 'e', 't']
+  Key: "aet"
+  Check map: key "aet" not found
+  Create new list: ["eat"]
   map = {"aet": ["eat"]}
 
 Step 2: Process "tea"
-  Sort "tea" → "aet"  (same key as "eat"!)
+  Input: "tea"
+  Convert to char[]: ['t', 'e', 'a']
+  Sort: ['a', 'e', 't']
+  Key: "aet"  (same key as "eat"!)
+  Check map: key "aet" found
+  Add to existing list: ["eat", "tea"]
   map = {"aet": ["eat", "tea"]}
 
 Step 3: Process "tan"
-  Sort "tan" → "ant"  (new key)
+  Input: "tan"
+  Convert to char[]: ['t', 'a', 'n']
+  Sort: ['a', 'n', 't']
+  Key: "ant"  (new key)
+  Check map: key "ant" not found
+  Create new list: ["tan"]
   map = {"aet": ["eat", "tea"],
          "ant": ["tan"]}
 
 Step 4: Process "ate"
-  Sort "ate" → "aet"  (matches "eat" and "tea")
+  Input: "ate"
+  Convert to char[]: ['a', 't', 'e']
+  Sort: ['a', 'e', 't']
+  Key: "aet"  (matches "eat" and "tea")
+  Check map: key "aet" found
+  Add to existing list: ["eat", "tea", "ate"]
   map = {"aet": ["eat", "tea", "ate"],
          "ant": ["tan"]}
 
 Step 5: Process "nat"
-  Sort "nat" → "ant"  (matches "tan")
+  Input: "nat"
+  Convert to char[]: ['n', 'a', 't']
+  Sort: ['a', 'n', 't']
+  Key: "ant"  (matches "tan")
+  Check map: key "ant" found
+  Add to existing list: ["tan", "nat"]
   map = {"aet": ["eat", "tea", "ate"],
          "ant": ["tan", "nat"]}
 
 Step 6: Process "bat"
-  Sort "bat" → "abt"  (new key)
+  Input: "bat"
+  Convert to char[]: ['b', 'a', 't']
+  Sort: ['a', 'b', 't']
+  Key: "abt"  (new key)
+  Check map: key "abt" not found
+  Create new list: ["bat"]
   map = {"aet": ["eat", "tea", "ate"],
          "ant": ["tan", "nat"],
          "abt": ["bat"]}
@@ -302,6 +363,45 @@ Convert map.values() to list:
   ["tan", "nat"],
   ["bat"]
 ]
+```
+
+---
+
+## Detailed Walkthrough (Approach 3: Frequency Array)
+
+Let's trace the same example with frequency counting:
+
+```
+Initial State:
+map = {}
+strs = ["eat", "tea", "tan", "ate", "nat", "bat"]
+
+Step 1: Process "eat"
+  Input: "eat"
+  Count array (a-z): [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0]
+                      a=1      e=1                         t=1
+  Key using Arrays.toString(): "[1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]"
+  map = {key: ["eat"]}
+
+Step 2: Process "tea"
+  Input: "tea"
+  Count array: [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0]
+               Same as "eat"! ✓
+  Key: Same as before
+  map = {key1: ["eat", "tea"]}
+
+Step 3: Process "tan"
+  Input: "tan"
+  Count array: [1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0]
+                a=1                        n=1         t=1
+  Key: "[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]"
+  map = {key1: ["eat", "tea"],
+         key2: ["tan"]}
+
+[Similar steps for "ate", "nat", "bat"...]
+
+Result: Same as sorted approach, but computed faster!
+Time: O(k) per string vs O(k log k)
 ```
 
 ---
@@ -370,7 +470,7 @@ for (int i = 0; i < 26; i++) {
 
 ---
 
-## Edge Cases to Consider
+## Edge Cases to Consider (12+ Cases)
 
 ```java
 // Test Case 1: Empty strings
@@ -378,31 +478,65 @@ Input: [""]
 Output: [[""]]
 // Empty string is valid, forms its own group
 
-// Test Case 2: Single string
+// Test Case 2: Multiple empty strings
+Input: ["", "", ""]
+Output: [["", "", ""]]
+// All empty strings are anagrams of each other
+
+// Test Case 3: Single string
 Input: ["a"]
 Output: [["a"]]
 
-// Test Case 3: All anagrams
+// Test Case 4: All anagrams
 Input: ["abc", "bca", "cab"]
 Output: [["abc", "bca", "cab"]]
 // All in one group
 
-// Test Case 4: No anagrams
+// Test Case 5: No anagrams
 Input: ["a", "b", "c"]
 Output: [["a"], ["b"], ["c"]]
 // Each forms its own group
 
-// Test Case 5: Different lengths
+// Test Case 6: Different lengths
 Input: ["abc", "ab", "abcd"]
 Output: [["abc"], ["ab"], ["abcd"]]
 // Different lengths cannot be anagrams
 
-// Test Case 6: Duplicate strings
-Input: ["abc", "abc"]
-Output: [["abc", "abc"]]
+// Test Case 7: Duplicate strings
+Input: ["abc", "abc", "abc"]
+Output: [["abc", "abc", "abc"]]
 // Same string counts as anagram of itself
 
-// Test Case 7: Mixed case (if constraint allowed)
+// Test Case 8: Single character strings
+Input: ["a", "a", "b", "b", "c"]
+Output: [["a", "a"], ["b", "b"], ["c"]]
+// Single chars grouped correctly
+
+// Test Case 9: Very long strings
+Input: ["abcdefghijklmnopqrstuvwxyz", "zyxwvutsrqponmlkjihgfedcba"]
+Output: [["abcdefghijklmnopqrstuvwxyz", "zyxwvutsrqponmlkjihgfedcba"]]
+// All 26 letters, reversed
+
+// Test Case 10: Strings with repeated characters
+Input: ["aaa", "aaa", "aa"]
+Output: [["aaa", "aaa"], ["aa"]]
+// Length matters
+
+// Test Case 11: Maximum input size
+Input: 10^4 strings, each 100 chars
+// Test performance at constraint limits
+
+// Test Case 12: All same letter, different counts
+Input: ["a", "aa", "aaa", "aaaa"]
+Output: [["a"], ["aa"], ["aaa"], ["aaaa"]]
+// Each has different frequency signature
+
+// Test Case 13: Palindromic anagrams
+Input: ["aab", "aba", "baa"]
+Output: [["aab", "aba", "baa"]]
+// All have same characters despite being palindromes
+
+// Test Case 14: Mixed case (if constraint allowed)
 // Note: Problem states lowercase only, but good to think about
 Input: ["Eat", "eat"]
 // Without case handling: [["Eat"], ["eat"]]
@@ -411,7 +545,7 @@ Input: ["Eat", "eat"]
 
 ---
 
-## Common Mistakes to Avoid
+## Common Mistakes to Avoid (6+ Mistakes)
 
 ### Mistake 1: Not using HashMap for grouping
 ```java
@@ -428,6 +562,7 @@ Map<String, List<String>> map = new HashMap<>();
 // ❌ WRONG - Collision risk
 String key = "";
 for (int c : count) key += c;
+// "12" could mean [1,2] or [12] - ambiguous!
 
 // ✅ CORRECT - Use delimiter or Arrays.toString()
 String key = Arrays.toString(count);
@@ -435,12 +570,12 @@ String key = Arrays.toString(count);
 
 ### Mistake 3: Not creating new ArrayList when needed
 ```java
-// ❌ WRONG - Creates list every time
+// ❌ WRONG - Creates list every time, overwrites existing
 for (String str : strs) {
     String key = getKey(str);
     List<String> list = new ArrayList<>();  // Wasteful!
     list.add(str);
-    map.put(key, list);
+    map.put(key, list);  // Loses previous entries!
 }
 
 // ✅ CORRECT - Check if key exists first
@@ -455,6 +590,60 @@ Arrays.sort(strs);  // Don't modify input!
 // ✅ CORRECT - Only sort individual strings for keys
 char[] chars = str.toCharArray();
 Arrays.sort(chars);
+```
+
+### Mistake 5: Forgetting to handle empty strings
+```java
+// ❌ WRONG - Assuming non-empty
+for (String str : strs) {
+    char first = str.charAt(0);  // Crashes on empty!
+}
+
+// ✅ CORRECT - Empty strings are valid
+// They naturally work with both sorted and frequency approaches
+if (str.isEmpty()) {
+    // Key will be "" for sorted or "[0,0,...,0]" for frequency
+}
+```
+
+### Mistake 6: Incorrect character counting
+```java
+// ❌ WRONG - Doesn't account for 'a' offset
+for (char c : str.toCharArray()) {
+    count[c]++;  // Wrong index! 'a' = 97, not 0
+}
+
+// ✅ CORRECT - Subtract 'a' to get 0-25 range
+for (char c : str.toCharArray()) {
+    count[c - 'a']++;
+}
+```
+
+### Mistake 7: Using wrong data structure for result
+```java
+// ❌ WRONG - Trying to return the map
+return map;  // Type mismatch: need List<List<String>>
+
+// ✅ CORRECT - Return values as ArrayList
+return new ArrayList<>(map.values());
+```
+
+### Mistake 8: Not considering time complexity
+```java
+// ❌ WRONG - Checking every pair
+for (int i = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+        if (isAnagram(strs[i], strs[j])) {
+            // O(n²) comparisons!
+        }
+    }
+}
+
+// ✅ CORRECT - Single pass with HashMap
+for (String str : strs) {
+    String key = computeKey(str);
+    map.computeIfAbsent(key, k -> new ArrayList<>()).add(str);
+}
 ```
 
 ---
@@ -548,14 +737,184 @@ for (int i = 0; i < 26; i++) {
 
 After mastering this problem, try:
 
-1. **Valid Anagram** (Easy) - Foundation for this problem
-2. **Find All Anagrams in String** (Medium) - Sliding window + frequency
-3. **Strings Differ by One Character** (Medium) - Similar grouping logic
-4. **Group Shifted Strings** (Medium) - Similar pattern with different key
+1. **Valid Anagram** (LeetCode #242, Easy) - Foundation for this problem
+   - Check if two strings are anagrams
+   - Same frequency counting technique
+
+2. **Find All Anagrams in String** (LeetCode #438, Medium) - Sliding window + frequency
+   - Find all anagram substrings in a string
+   - Uses sliding window with frequency map
+
+3. **Strings Differ by One Character** (LeetCode #1554, Medium) - Similar grouping logic
+   - Group strings that differ by exactly one character
+   - Similar HashMap grouping pattern
+
+4. **Group Shifted Strings** (LeetCode #249, Medium) - Similar pattern with different key
+   - Group strings by shift pattern
+   - Use relative distance as key
+
+5. **Sort Characters by Frequency** (LeetCode #451, Medium)
+   - Sort characters by their frequency
+   - Uses frequency counting
+
+6. **Top K Frequent Words** (LeetCode #692, Medium)
+   - Find most frequent words
+   - HashMap + sorting/heap
+
+7. **Isomorphic Strings** (LeetCode #205, Easy)
+   - Check if two strings are isomorphic
+   - Character mapping pattern
+
+8. **Word Pattern** (LeetCode #290, Easy)
+   - Check if string follows a pattern
+   - Similar mapping concept
 
 ---
 
-## Interview Tips
+## Performance Comparison: Sorted vs Frequency
+
+### Benchmark Results (Theoretical)
+
+**Input**: 10,000 strings, each 100 characters
+
+| Approach | Time per String | Total Time | Key Size | Memory |
+|----------|----------------|------------|----------|--------|
+| Sorted Key | O(100 log 100) ≈ 664 ops | 6.64M ops | 100 bytes | ~1MB keys |
+| Frequency Count | O(100 + 26) = 126 ops | 1.26M ops | ~130 bytes | ~1.3MB keys |
+| **Speedup** | **5.3x faster** | **5.3x faster** | Slightly larger | Similar |
+
+### When Each Approach Wins:
+
+**Use Sorted Key When:**
+- ✅ Interview setting (simpler to code, less error-prone)
+- ✅ Strings are short (k < 20)
+- ✅ Code readability is priority
+- ✅ Working with arbitrary Unicode characters
+
+**Use Frequency Count When:**
+- ✅ Strings are long (k > 100)
+- ✅ Performance is critical
+- ✅ Character set is known and small (a-z, A-Z)
+- ✅ Processing millions of strings
+
+### Real-World Performance Tips:
+
+1. **Pre-allocate HashMap size** if input size is known:
+   ```java
+   Map<String, List<String>> map = new HashMap<>(strs.length);
+   ```
+
+2. **Use StringBuilder efficiently**:
+   ```java
+   StringBuilder key = new StringBuilder(26 * 3); // Pre-size for "#n#n#..."
+   ```
+
+3. **Consider parallel processing** for very large inputs:
+   ```java
+   Arrays.stream(strs)
+         .parallel()
+         .collect(Collectors.groupingBy(this::getSignature));
+   ```
+
+---
+
+## Testing Strategy
+
+### Unit Test Template
+```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class GroupAnagramsTest {
+    private Solution solution = new Solution();
+    
+    @Test
+    public void testExample1() {
+        String[] input = {"eat", "tea", "tan", "ate", "nat", "bat"};
+        List<List<String>> result = solution.groupAnagrams(input);
+        
+        assertEquals(3, result.size());
+        // Note: Order of groups doesn't matter, need to verify contents
+        assertTrue(containsGroup(result, Arrays.asList("eat", "tea", "ate")));
+        assertTrue(containsGroup(result, Arrays.asList("tan", "nat")));
+        assertTrue(containsGroup(result, Arrays.asList("bat")));
+    }
+    
+    @Test
+    public void testEmptyString() {
+        String[] input = {""};
+        List<List<String>> result = solution.groupAnagrams(input);
+        assertEquals(1, result.size());
+        assertEquals(Arrays.asList(""), result.get(0));
+    }
+    
+    @Test
+    public void testSingleString() {
+        String[] input = {"a"};
+        List<List<String>> result = solution.groupAnagrams(input);
+        assertEquals(1, result.size());
+    }
+    
+    @Test
+    public void testAllAnagrams() {
+        String[] input = {"abc", "bca", "cab"};
+        List<List<String>> result = solution.groupAnagrams(input);
+        assertEquals(1, result.size());
+        assertEquals(3, result.get(0).size());
+    }
+    
+    @Test
+    public void testNoAnagrams() {
+        String[] input = {"a", "b", "c"};
+        List<List<String>> result = solution.groupAnagrams(input);
+        assertEquals(3, result.size());
+    }
+    
+    @Test
+    public void testDuplicates() {
+        String[] input = {"abc", "abc", "abc"};
+        List<List<String>> result = solution.groupAnagrams(input);
+        assertEquals(1, result.size());
+        assertEquals(3, result.get(0).size());
+    }
+    
+    @Test
+    public void testLargeInput() {
+        String[] input = new String[10000];
+        Arrays.fill(input, "test");
+        List<List<String>> result = solution.groupAnagrams(input);
+        assertEquals(1, result.size());
+        assertEquals(10000, result.get(0).size());
+    }
+    
+    private boolean containsGroup(List<List<String>> result, List<String> expected) {
+        for (List<String> group : result) {
+            if (group.size() == expected.size() && 
+                group.containsAll(expected)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+### Test Cases Checklist
+- [ ] Empty array: `[]`
+- [ ] Single empty string: `[""]`
+- [ ] Single character: `["a"]`
+- [ ] All same: `["abc", "abc", "abc"]`
+- [ ] All anagrams: `["abc", "bca", "cab"]`
+- [ ] No anagrams: `["a", "b", "c"]`
+- [ ] Mixed: `["eat", "tea", "tan", "ate", "nat", "bat"]`
+- [ ] Long strings: 100-character strings
+- [ ] Maximum size: 10^4 strings
+- [ ] Multiple empty strings: `["", "", ""]`
+- [ ] Single char repeated: `["a", "a", "a"]`
+
+---
+
+## Interview Tips (Comprehensive Guide)
 
 ### What to Say During Interview:
 
@@ -563,24 +922,30 @@ After mastering this problem, try:
    - "Can I assume lowercase letters only?"
    - "Is the order of groups important?"
    - "Can strings be empty?"
+   - "What's the expected size of input?"
+   - "Should I handle Unicode or special characters?"
 
 2. **Explain Approach**:
    - "I'll use a HashMap to group anagrams together"
    - "For the key, I can either sort the string or use character frequencies"
+   - "Sorting is simpler but O(k log k), frequency count is O(k) but more code"
 
 3. **Discuss Trade-offs**:
    - "Sorting is O(k log k) per string but simpler to implement"
    - "Frequency count is O(k) but requires more code"
    - "I'll go with [sorted/frequency] because..."
+   - "If we had very long strings, frequency counting would be better"
 
 4. **Code Strategy**:
-   - Write sorted approach first (faster to code)
+   - Write sorted approach first (faster to code, less error-prone)
    - Trace through one example
    - Mention optimization if time permits
+   - Use computeIfAbsent for cleaner code
 
 5. **Edge Cases**:
    - "I'll handle empty strings"
    - "Different length strings can't be anagrams"
+   - "Duplicate strings naturally group together"
 
 ### Expected Follow-up Questions:
 
@@ -588,13 +953,50 @@ After mastering this problem, try:
 **A**: "Yes, use frequency count instead of sorting for O(n × k) instead of O(n × k log k)"
 
 **Q**: "What if strings contain Unicode characters?"
-**A**: "Use HashMap for frequency count instead of array, since we can't predict character range"
+**A**: "Use HashMap<Character, Integer> for frequency count instead of int[26] array, since we can't predict character range"
 
 **Q**: "How does your solution handle duplicates?"
-**A**: "Duplicate strings have the same key, so they naturally group together"
+**A**: "Duplicate strings have the same key, so they naturally group together in the same list"
 
 **Q**: "Can you make the code cleaner?"
-**A**: "Yes, use computeIfAbsent to eliminate null checks"
+**A**: "Yes, use computeIfAbsent to eliminate null checks and make the logic one-liner"
+
+**Q**: "What if memory is constrained?"
+**A**: "The HashMap approach is already optimal for space. We could stream the results if needed to avoid storing all groups at once"
+
+**Q**: "How would you handle case-insensitive anagrams?"
+**A**: "Convert each string to lowercase before processing: `str.toLowerCase()` before creating the key"
+
+**Q**: "Could you group by another property, like length?"
+**A**: "Yes, this pattern works for any grouping - just change the key computation. For length: `String key = String.valueOf(str.length())`"
+
+### Common Interview Mistakes to Avoid:
+
+1. ❌ **Starting to code immediately** - Take 1-2 minutes to think and explain approach
+2. ❌ **Not testing with examples** - Always trace through at least one example
+3. ❌ **Ignoring edge cases** - Mention empty strings, single elements, all same/all different
+4. ❌ **Not explaining time/space complexity** - Interviewer expects this analysis
+5. ❌ **Making code too complex** - Start with sorted approach, mention optimization after
+6. ❌ **Forgetting to ask clarifying questions** - Shows lack of communication skills
+
+### Time Management (25-minute target for Medium):
+
+- **Minutes 0-2**: Clarify problem, discuss approach
+- **Minutes 2-5**: Write high-level plan, discuss trade-offs
+- **Minutes 5-15**: Code solution (sorted approach)
+- **Minutes 15-20**: Test with examples, fix bugs
+- **Minutes 20-25**: Discuss optimization, edge cases, complexity
+
+### What Makes a Strong Interview Performance:
+
+✅ **Clear communication** throughout the process
+✅ **Multiple approaches** discussed (even if you only code one)
+✅ **Trade-offs explained** (time vs space, simplicity vs performance)
+✅ **Edge cases handled** without prompting
+✅ **Clean, readable code** with meaningful variable names
+✅ **Testing included** - trace through examples
+✅ **Complexity analysis** provided
+✅ **Optimization mentioned** even if not implemented
 
 ---
 
@@ -689,6 +1091,214 @@ class Solution {
 
 ---
 
+## Python Solutions
+
+### Python: Sorted Key Approach
+```python
+from typing import List
+from collections import defaultdict
+
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        """
+        Group anagrams using sorted string as key.
+        
+        Time: O(n × k log k) where n = len(strs), k = max len(str)
+        Space: O(n × k)
+        """
+        # defaultdict automatically creates empty list for new keys
+        anagram_groups = defaultdict(list)
+        
+        for s in strs:
+            # Sort string and use as key
+            # ''.join(sorted(s)) converts list back to string
+            key = ''.join(sorted(s))
+            anagram_groups[key].append(s)
+        
+        # Return values as list
+        return list(anagram_groups.values())
+```
+
+### Python: Frequency Count with Tuple
+```python
+from typing import List
+from collections import defaultdict
+
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        """
+        Group anagrams using character frequency tuple as key.
+        
+        Time: O(n × k) - optimal!
+        Space: O(n × k)
+        """
+        anagram_groups = defaultdict(list)
+        
+        for s in strs:
+            # Count character frequencies
+            count = [0] * 26
+            for c in s:
+                count[ord(c) - ord('a')] += 1
+            
+            # Tuple is hashable, can be used as dict key
+            # List cannot be dict key in Python!
+            key = tuple(count)
+            anagram_groups[key].append(s)
+        
+        return list(anagram_groups.values())
+```
+
+### Python: Using Counter (Most Pythonic)
+```python
+from typing import List
+from collections import defaultdict, Counter
+
+class Solution:
+    def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        """
+        Group anagrams using Counter for frequency.
+        
+        Time: O(n × k)
+        Space: O(n × k)
+        """
+        anagram_groups = defaultdict(list)
+        
+        for s in strs:
+            # Counter creates frequency dict
+            # frozenset makes it hashable
+            # Or convert Counter to sorted tuple
+            key = tuple(sorted(Counter(s).items()))
+            anagram_groups[key].append(s)
+        
+        return list(anagram_groups.values())
+```
+
+---
+
+## JavaScript Solutions
+
+### JavaScript: Sorted Key
+```javascript
+/**
+ * @param {string[]} strs
+ * @return {string[][]}
+ */
+var groupAnagrams = function(strs) {
+    // Map to store anagram groups
+    const anagramGroups = new Map();
+    
+    for (let str of strs) {
+        // Sort string to create key
+        const key = str.split('').sort().join('');
+        
+        // Add to group
+        if (!anagramGroups.has(key)) {
+            anagramGroups.set(key, []);
+        }
+        anagramGroups.get(key).push(str);
+    }
+    
+    // Return all groups as array
+    return Array.from(anagramGroups.values());
+};
+```
+
+### JavaScript: Frequency Count
+```javascript
+var groupAnagrams = function(strs) {
+    const anagramGroups = new Map();
+    
+    for (let str of strs) {
+        // Count character frequencies
+        const count = new Array(26).fill(0);
+        for (let char of str) {
+            count[char.charCodeAt(0) - 'a'.charCodeAt(0)]++;
+        }
+        
+        // Use array as string key
+        const key = count.join('#');
+        
+        if (!anagramGroups.has(key)) {
+            anagramGroups.set(key, []);
+        }
+        anagramGroups.get(key).push(str);
+    }
+    
+    return Array.from(anagramGroups.values());
+};
+```
+
+---
+
+## C++ Solutions
+
+### C++: Sorted Key
+```cpp
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <algorithm>
+
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        unordered_map<string, vector<string>> anagramGroups;
+        
+        for (const string& str : strs) {
+            // Sort string to create key
+            string key = str;
+            sort(key.begin(), key.end());
+            
+            // Add to group
+            anagramGroups[key].push_back(str);
+        }
+        
+        // Extract all groups
+        vector<vector<string>> result;
+        for (auto& pair : anagramGroups) {
+            result.push_back(pair.second);
+        }
+        
+        return result;
+    }
+};
+```
+
+### C++: Frequency Count
+```cpp
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        unordered_map<string, vector<string>> anagramGroups;
+        
+        for (const string& str : strs) {
+            // Count character frequencies
+            vector<int> count(26, 0);
+            for (char c : str) {
+                count[c - 'a']++;
+            }
+            
+            // Build key from frequency
+            string key;
+            for (int i = 0; i < 26; i++) {
+                key += "#" + to_string(count[i]);
+            }
+            
+            anagramGroups[key].push_back(str);
+        }
+        
+        vector<vector<string>> result;
+        for (auto& pair : anagramGroups) {
+            result.push_back(pair.second);
+        }
+        
+        return result;
+    }
+};
+```
+
+---
+
 ## Practice Checklist
 
 - [ ] Implement sorted key approach
@@ -729,14 +1339,41 @@ private String computeKey(TYPE item) {
 
 ---
 
-## Key Takeaways
+## Key Takeaways (10 Essential Points)
 
-1. ✅ **HashMap excels at grouping** - O(1) lookup to find/create groups
-2. ✅ **Sorted string** works as anagram signature - simple and intuitive
-3. ✅ **Frequency count** is asymptotically faster - O(k) vs O(k log k)
-4. ✅ **Use delimiters** or Arrays.toString() to avoid key collisions
-5. ✅ **computeIfAbsent** makes code cleaner and more readable
-6. ✅ This pattern appears in many "grouping by characteristic" problems
+1. ✅ **HashMap excels at grouping** - O(1) lookup to find/create groups eliminates need for nested loops
+
+2. ✅ **Sorted string** works as anagram signature - simple and intuitive, great for interviews
+
+3. ✅ **Frequency count** is asymptotically faster - O(k) vs O(k log k) per string
+
+4. ✅ **Use delimiters** or Arrays.toString() to avoid key collisions when building frequency signatures
+
+5. ✅ **computeIfAbsent** makes code cleaner and more readable by eliminating manual null checks
+
+6. ✅ **This pattern appears everywhere** - any "grouping by characteristic" problem can use this approach
+
+7. ✅ **String immutability matters** - Creating keys from char arrays requires `new String(chars)`
+
+8. ✅ **Trade-off between simplicity and performance** - Sorted key is easier to code; frequency count is faster
+
+9. ✅ **Anagrams must have same length** - Different lengths can never be anagrams (could optimize with length pre-filtering)
+
+10. ✅ **Character offset is crucial** - Always use `c - 'a'` for counting to map 'a'-'z' to 0-25
+
+---
+
+## Bonus Takeaways
+
+11. ✅ **StringBuilder vs String concatenation** - Use StringBuilder when building keys in loops to avoid O(n²) string creation
+
+12. ✅ **Empty strings are valid** - Don't special-case them; they naturally work with both approaches
+
+13. ✅ **HashMap.values() returns Collection** - Need `new ArrayList<>(map.values())` to convert to List
+
+14. ✅ **Group order doesn't matter** - Problem allows any order, so HashMap's unpredictable iteration is fine
+
+15. ✅ **Duplicate strings are anagrams** - "abc" and "abc" are anagrams of each other by definition
 
 ---
 

@@ -134,6 +134,24 @@ Apply knowledge to actual system designs.
 
 ---
 
+## 🧠 10x Production Engineering Loop
+
+For each system you design, run this second pass after the 45-minute interview pass:
+
+1. **SLO pass**: Define latency, availability, and durability targets.
+2. **Failure pass**: List top 5 failure modes and mitigations.
+3. **Rollout pass**: Add canary, feature flag, and rollback strategy.
+4. **Observability pass**: Define Golden Signals dashboard + alert thresholds.
+5. **Cost pass**: Estimate highest-cost components and optimization options.
+6. **Operations pass**: Write a one-page runbook for the on-call engineer.
+
+Use these companion modules while doing the loop:
+- [06-data-patterns/README.md](06-data-patterns/README.md) - Consistency and correctness decisions
+- [10-classic-designs/README.md](10-classic-designs/README.md) - End-to-end real-world designs
+- [12-interview-practice/README.md](12-interview-practice/README.md) - Interview-to-production practice workflow
+
+---
+
 ## 📖 Resources
 
 ### Books (Read in order)

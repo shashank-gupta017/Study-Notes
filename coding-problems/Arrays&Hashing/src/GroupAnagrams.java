@@ -15,6 +15,8 @@ public class GroupAnagrams {
         for (String str : strs) {
 
             char[] chars = str.toCharArray();
+
+            // Sort the character array to form the key
             Arrays.sort(chars);
 
             String key = new String(chars);
