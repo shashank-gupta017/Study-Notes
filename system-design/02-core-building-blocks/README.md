@@ -570,7 +570,7 @@ Which algorithm for each? Why?
 1. **Load Balancers**: Distribute traffic, enable scaling
 2. **Caching**: Speed vs freshness trade-off
 3. **Databases**: SQL for structure, NoSQL for scale
-4. **Queues**: Async processing, decoupling
+4. **Queues**: Async processing, decoupling, Burst Handling.
 
 ---
 
